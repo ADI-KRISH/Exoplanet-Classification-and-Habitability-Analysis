@@ -7,16 +7,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAI
 from google.auth.exceptions import DefaultCredentialsError
-import google.generativeai as genai  # Add this import
+import google.generativeai as genai  
 
 # === Load Environment Variables ===
 
 
 # === Model Paths ===
-model_path = r"C:/Users/GS Adithya Krishna/Desktop/ML/machine_learning/rf_model.pkl"
-scaler_path = r"C:/Users/GS Adithya Krishna/Desktop/ML/machine_learning/sc_model.pkl"
-xg_path = r"C:/Users/GS Adithya Krishna/Desktop/ML/machine_learning/xgboost_model.pkl"
-sc_cont = r"C:/Users/GS Adithya Krishna/Desktop/ML/machine_learning/scaler_continuous.pkl"
+exoplanet_model_path = # add your model path
+exoplanet_standard_scaler_path = # add your model path
+habitability_model_path =# add your model path
+habitability_standard_scaler_path = # add your model path
 
 # === Validate File Existence ===
 for path in [model_path, scaler_path, xg_path, sc_cont]:
@@ -24,10 +24,10 @@ for path in [model_path, scaler_path, xg_path, sc_cont]:
         raise FileNotFoundError(f"Required file not found at {path}")
 
 # === Load Models ===
-model = joblib.load(model_path)
-scaler = joblib.load(scaler_path)
+exo_model = joblib.load(exoplanet_model_path)
+scaler1 = joblib.load(habitability_model_path)
 habitability_model = joblib.load(xg_path)
-sc = joblib.load(sc_cont)
+scaler2 = joblib.load(habitability_standard_scaler_path)
 
 # === FastAPI App ===
 app = FastAPI()
@@ -65,7 +65,7 @@ def predict(input_data: Exoplanet_input):
 
         continuous_features = features[continuous_indices].reshape(1, -1)
         flag_features = features[binary_flag_indices].reshape(1, -1)
-        scaled_continuous = scaler.transform(continuous_features)
+        scaled_continuous = scaler1.transform(continuous_features)
 
         final_input = []
         scaled_iter = iter(scaled_continuous.flatten())
@@ -78,7 +78,7 @@ def predict(input_data: Exoplanet_input):
 
         final_input = np.array(final_input).reshape(1, -1)
 
-        prediction = model.predict(final_input)[0]
+        prediction = exo_model.predict(final_input)[0]
         class_index = list(model.classes_).index(prediction)
         confidence = model.predict_proba(final_input)[0][class_index]
 
@@ -103,7 +103,7 @@ def habitability_predict(input_data: Habitability_input):
 
         continuous_features = features[c_i].reshape(1, -1)
         flag_features = features[b_i].reshape(1, -1)
-        scaled_continuous = sc.transform(continuous_features)
+        scaled_continuous = scaler2.transform(continuous_features)
 
         final_input = []
         scaled_iter = iter(scaled_continuous.flatten())
