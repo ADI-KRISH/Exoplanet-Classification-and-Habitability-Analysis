@@ -1,0 +1,15 @@
+# Ignore environment variables
+.env
+
+# Python
+__pycache__/
+*.pyc
+
+# VS Code settings (optional)
+.vscode/
+
+# Node modules (if frontend is React/Vite)
+node_modules/
+
+# Model files
+*.pkl
