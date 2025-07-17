@@ -69,7 +69,7 @@ function PredictionForm() {
         return;
       }
 
-      const response = await fetch('http://localhost:8000/predict', {
+        const response = await fetch('https://exoplanet-classification-and-hol4.onrender.com/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ features: numericFeatures })
