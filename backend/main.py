@@ -24,10 +24,10 @@ for path in [model_path, scaler_path, xg_path, sc_cont]:
         raise FileNotFoundError(f"Required file not found at {path}")
 
 # === Load Models ===
-exo_model = joblib.load(exoplanet_model_path)
-scaler1 = joblib.load(habitability_model_path)
-habitability_model = joblib.load(xg_path)
-scaler2 = joblib.load(habitability_standard_scaler_path)
+exo_model = joblib.load('rf_modes.pkl')
+scaler1 = joblib.load('sc_model.pkl')
+habitability_model = joblib.load('xgboost_model.pkl')
+scaler2 = joblib.load('scaler_continuous.pkl')
 
 # === FastAPI App ===
 app = FastAPI()
