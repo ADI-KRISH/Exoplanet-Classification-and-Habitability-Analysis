@@ -59,7 +59,7 @@ ${habitabilityFeatures.map((val, i) => `${habitFeatureDescriptions[i]}: ${val}`)
             body: JSON.stringify({ message })
           });
 
-          const data = await res.json();
+          const data = await response.json();
           const cleanExplanation = (data.explanation || 'No explanation returned from Gemini.').replace(/\*/g, '');
           setGeminiResponse(cleanExplanation);
                   } catch (err) {
