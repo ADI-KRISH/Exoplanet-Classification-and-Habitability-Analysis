@@ -1,5 +1,10 @@
 fastapi
 uvicorn[standard]
 joblib
+numpy
 scikit-learn
-google-generativeai  
+xgboost
+python-dotenv
+google-generativeai
+langchain
+langchain-google-genai
