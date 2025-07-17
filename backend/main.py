@@ -1,17 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 import joblib
 import numpy as np
 import os
-from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
-from langchain_google_genai import GoogleGenerativeAI
+import google.generativeai as genai
 from google.auth.exceptions import DefaultCredentialsError
-import google.generativeai as genai  
+from langchain_google_genai import GoogleGenerativeAI
 
-# === Load Environment Variables ===
-
-
+# === Load Environment Variables Early ===
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("apikey")
+if not GOOGLE_API_KEY:
+    raise RuntimeError("GOOGLE_API_KEY environment variable is required")
 
 # === Load Models ===
 exo_model = joblib.load('rf_model.pkl')
@@ -19,7 +21,7 @@ scaler1 = joblib.load('sc_model.pkl')
 habitability_model = joblib.load('xgboost_model.pkl')
 scaler2 = joblib.load('scaler_continuous.pkl')
 
-# === FastAPI App ===
+# === FastAPI App Setup ===
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -31,21 +33,21 @@ app.add_middleware(
 
 # === Input Schemas ===
 class Exoplanet_input(BaseModel):
-    features: list  # 19 features for classification
+    features: list  # 19 features
 
 class Habitability_input(BaseModel):
-    features: list  # 15 features for habitability
+    features: list  # 15 features
 
 class GeminiExplanationRequest(BaseModel):
     message: str
 
-# === Indices for Feature Processing ===
+# === Feature Indexing ===
 continuous_indices = [0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
 binary_flag_indices = [4, 5, 6, 7]
 c_i = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 b_i = [0, 3]
 
-# === Exoplanet Prediction ===
+# === Exoplanet Prediction Endpoint ===
 @app.post("/predict")
 def predict(input_data: Exoplanet_input):
     try:
@@ -60,6 +62,7 @@ def predict(input_data: Exoplanet_input):
         final_input = []
         scaled_iter = iter(scaled_continuous.flatten())
         flag_iter = iter(flag_features.flatten())
+
         for i in range(19):
             if i in binary_flag_indices:
                 final_input.append(next(flag_iter))
@@ -69,8 +72,8 @@ def predict(input_data: Exoplanet_input):
         final_input = np.array(final_input).reshape(1, -1)
 
         prediction = exo_model.predict(final_input)[0]
-        class_index = list(model.classes_).index(prediction)
-        confidence = model.predict_proba(final_input)[0][class_index]
+        class_index = list(exo_model.classes_).index(prediction)
+        confidence = exo_model.predict_proba(final_input)[0][class_index]
 
         return {
             "prediction": prediction,
@@ -81,13 +84,11 @@ def predict(input_data: Exoplanet_input):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# === Habitability Prediction ===
+# === Habitability Prediction Endpoint ===
 @app.post("/habitability-predict")
 def habitability_predict(input_data: Habitability_input):
     try:
         features = np.array(input_data.features)
-        
-        
         if len(features) != 15:
             raise ValueError("Exactly 15 features are required.")
 
@@ -98,6 +99,7 @@ def habitability_predict(input_data: Habitability_input):
         final_input = []
         scaled_iter = iter(scaled_continuous.flatten())
         flag_iter = iter(flag_features.flatten())
+
         for i in range(15):
             if i in b_i:
                 final_input.append(next(flag_iter))
@@ -116,15 +118,7 @@ def habitability_predict(input_data: Habitability_input):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# === Gemini LLM Explanation ===
-load_dotenv()
-
-# Validate required environment variables
-GOOGLE_API_KEY = os.getenv("apikey")
-if not GOOGLE_API_KEY:
-    raise RuntimeError("GOOGLE_API_KEY environment variable is required")
-
-# Initialize Gemini LLM
+# === Gemini LLM Initialization ===
 try:
     genai.configure(api_key=GOOGLE_API_KEY)
     llm = GoogleGenerativeAI(
@@ -133,14 +127,11 @@ try:
         google_api_key=GOOGLE_API_KEY
     )
 except DefaultCredentialsError as e:
-    raise RuntimeError(
-        "Google Cloud credentials not found. Please set up Application Default Credentials "
-        "or provide a GOOGLE_API_KEY in your environment variables. "
-        "See https://cloud.google.com/docs/authentication/external/set-up-adc"
-    ) from e
+    raise RuntimeError("Google Cloud credentials not found.") from e
 except Exception as e:
     raise RuntimeError(f"Failed to initialize Gemini: {str(e)}")
 
+# === Gemini Explanation Endpoint ===
 @app.post("/gemini-explanation")
 async def generate_explanation(input_data: GeminiExplanationRequest):
     try:
