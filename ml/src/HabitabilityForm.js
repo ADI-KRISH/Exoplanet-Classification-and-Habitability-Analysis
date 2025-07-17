@@ -62,7 +62,7 @@ function HabitabilityForm() {
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:8000/habitability-predict', {
+        const response = await fetch('https://exoplanet-classification-and-hol4.onrender.com/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ features: features.map(Number) })
