@@ -14,7 +14,7 @@ import google.generativeai as genai
 
 
 # === Load Models ===
-exo_model = joblib.load('rf_modes.pkl')
+exo_model = joblib.load('rf_model.pkl')
 scaler1 = joblib.load('sc_model.pkl')
 habitability_model = joblib.load('xgboost_model.pkl')
 scaler2 = joblib.load('scaler_continuous.pkl')
