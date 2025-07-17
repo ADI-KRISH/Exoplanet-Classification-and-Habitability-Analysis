@@ -53,7 +53,7 @@ ${habitabilityFeatures.map((val, i) => `${habitFeatureDescriptions[i]}: ${val}`)
 
 
         try {
-            const response = await fetch('https://exoplanet-classification-and-hol4.onrender.com/predict', {
+            const response = await fetch('https://exoplanet-classification-and-hol4.onrender.com/gemini-explanation', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message })
