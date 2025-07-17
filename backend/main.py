@@ -12,16 +12,6 @@ import google.generativeai as genai
 # === Load Environment Variables ===
 
 
-# === Model Paths ===
-exoplanet_model_path = # add your model path
-exoplanet_standard_scaler_path = # add your model path
-habitability_model_path =# add your model path
-habitability_standard_scaler_path = # add your model path
-
-# === Validate File Existence ===
-for path in [model_path, scaler_path, xg_path, sc_cont]:
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"Required file not found at {path}")
 
 # === Load Models ===
 exo_model = joblib.load('rf_modes.pkl')
