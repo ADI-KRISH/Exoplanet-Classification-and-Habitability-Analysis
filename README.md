@@ -1,4 +1,5 @@
 # 🌌 Exoplanet Classification and Habitability Analysis
+https://exoplanet-classification-and-habita.vercel.app/
 
 An **ML-based web application** that classifies Kepler exoplanets and evaluates their potential habitability.  
 This project combines **machine learning, data visualization, and modern web technologies** to make exoplanet insights accessible and interactive.
